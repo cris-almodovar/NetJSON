@@ -979,7 +979,7 @@ namespace NetJSON {
                     .Append(NetJSON.IntToStr(date.Hour).PadLeft(2, '0')).Append(':')
                     .Append(NetJSON.IntToStr(date.Minute).PadLeft(2, '0')).Append(':')
                     .Append(NetJSON.IntToStr(date.Second).PadLeft(2, '0')).Append('.')
-                    .Append(NetJSON.IntToStr(NetJSON.GetMilliseconds(date.TimeOfDay)).PadRight(7, '0'))
+                    .Append(NetJSON.IntToStr(NetJSON.GetMilliseconds(date.TimeOfDay)).PadLeft(7, '0'))
                     .Append('Z')
                     .ToString();
         }
