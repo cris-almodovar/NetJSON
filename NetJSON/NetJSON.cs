@@ -968,12 +968,28 @@ namespace NetJSON {
         [ThreadStatic]
         private static StringBuilder _cachedDateStringBuilder;
 
-        public static string DateToISOFormat(DateTime date) {
-            return (_cachedDateStringBuilder ?? (_cachedDateStringBuilder = new StringBuilder(25)))
-                .Clear().Append(IntToStr(date.Year)).Append('-').Append(IntToStr(date.Month))
-            .Append('-').Append(IntToStr(date.Day)).Append('T').Append(IntToStr(date.Hour)).Append(':').Append(IntToStr(date.Minute)).Append(':')
-            .Append(IntToStr(date.Second)).Append('.').Append(IntToStr(date.Millisecond)).Append('Z').ToString();
+        public static string DateToISOFormat(DateTime date)
+        {
+            return (_cachedDateStringBuilder ?? (_cachedDateStringBuilder = new StringBuilder(30)))
+                    .Clear()
+                    .Append(NetJSON.IntToStr(date.Year)).Append('-')
+                    .Append(NetJSON.IntToStr(date.Month).PadLeft(2, '0')).Append('-')
+                    .Append(NetJSON.IntToStr(date.Day).PadLeft(2, '0'))
+                    .Append('T')
+                    .Append(NetJSON.IntToStr(date.Hour).PadLeft(2, '0')).Append(':')
+                    .Append(NetJSON.IntToStr(date.Minute).PadLeft(2, '0')).Append(':')
+                    .Append(NetJSON.IntToStr(date.Second).PadLeft(2, '0')).Append('.')
+                    .Append(NetJSON.IntToStr(NetJSON.GetMilliseconds(date.TimeOfDay)).PadRight(7, '0'))
+                    .Append('Z')
+                    .ToString();
         }
+
+        private static int GetMilliseconds(TimeSpan time)
+        {
+            var truncatedTime = TimeSpan.FromSeconds(Math.Truncate(time.TotalSeconds));
+            return (int)(time.Ticks - truncatedTime.Ticks);
+        }
+
 
         private static DateTime Epoch = new DateTime(1970, 1, 1),
             UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
@@ -3496,6 +3512,10 @@ OpCodes.Call,
                 var unixTimeStamp = FastStringToLong(value);
                 var date = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
                 return date.AddSeconds(unixTimeStamp).ToLocalTime();
+            }
+            if (NetJSON._dateFormat == NetJSONDateFormat.ISO)
+            {
+                return DateTime.ParseExact(value, "yyyy-MM-ddTHH:mm:ss.fffffffZ", null, DateTimeStyles.AdjustToUniversal);
             }
 
             if (value == "\\/Date(-62135596800)\\/")
